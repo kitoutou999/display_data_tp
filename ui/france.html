@@ -129,33 +129,47 @@
         function drawPrestation(data, department){
             const detailsDiv = d3.select("#details");
             detailsDiv.html(""); 
-            detailsDiv.append("h2").text(`Département ${department}`);
+            detailsDiv.append("h2").html(`Département <span style='color:red'>${department}</span>`);
     
                 const prestations = data.data.prestationsByDpt;
                 
-                // Calcul des KPIs
                 const totalCount = d3.sum(prestations, d => d.count);
                 const totalRevenue = d3.sum(prestations, d => d.sum);
-                const avgPrice = totalRevenue / totalCount;
+                const prixMoyen = totalRevenue / totalCount;
 
-                // Affichage des KPIs
-                const kpiDiv = detailsDiv.append("div").style("display", "flex").style("gap", "20px").style("margin-bottom", "20px");
-                kpiDiv.append("div").html(`<strong>Total Interventions:</strong> ${totalCount}`);
-                kpiDiv.append("div").html(`<strong>Chiffre d'affaires:</strong> ${totalRevenue.toLocaleString()} €`);
-                kpiDiv.append("div").html(`<strong>Prix Moyen:</strong> ${avgPrice.toFixed(2)} €`);
+                const stats = detailsDiv.append("div")
+                    .style("display", "flex")
+                    .style("gap", "20px")
+                    .style("margin-bottom", "20px");
+                
+                stats.append("div").html(`<strong>Total Interventions:</strong> ${totalCount}`);
+                stats.append("div").html(`<strong>Chiffre d'affaires:</strong> ${totalRevenue.toLocaleString()} €`);
+                stats.append("div").html(`<strong>Prix Moyen:</strong> ${prixMoyen.toFixed(2)} €`);
 
-                // Graphique en barres
+                // Préparation des données (tri et nettoyage)
+                const fixedDesc = prestations.map(d => {
+                    return {
+                        description: d.description.replaceAll("??", "é"),
+                        count: d.count
+                    };
+                });
+                fixedDesc.sort((a, b) => b.count - a.count);
+
+                const contentDiv = detailsDiv.append("div")
+                    .style("display", "flex")
+                    .style("align-items", "flex-start");
+
                 const margin = { top: 50, right: 30, bottom: 100, left: 60 },
                     width = 500 - margin.left - margin.right,
                     height = 400 - margin.top - margin.bottom;
 
-                const svg = detailsDiv.append("svg")
+                const svg = contentDiv.append("svg")
                     .attr("width", width + margin.left + margin.right)
                     .attr("height", height + margin.top + margin.bottom)
                     .append("g")
                     .attr("transform", `translate(${margin.left},${margin.top})`);
 
-                // Titre du graphique
+                // Titre
                 svg.append("text")
                     .attr("x", (width / 2))             
                     .attr("y", -20)
@@ -163,16 +177,6 @@
                     .style("font-size", "16px") 
                     .style("font-weight", "bold")  
                     .text("Répartition des prestations");
-
-                //Remplace les "??" par des "é" (pas trouver le probleme d'encodage)
-                const fixedDesc = prestations.map(d => {
-                    return {
-                        description: d.description.replaceAll("??", "é"),
-                        count: d.count
-                    };
-                });
-
-                fixedDesc.sort((a, b) => b.count - a.count);
 
                 // Axe X
                 const x = d3.scaleBand()
@@ -203,7 +207,19 @@
                     .attr("y", d => y(d.count))
                     .attr("width", x.bandwidth())
                     .attr("height", d => height - y(d.count))
-                    .attr("fill", "#69b3a2")  
+                    .attr("fill", "#69b3a2")
+                    
+
+                
+                const listDiv = contentDiv.append("div")
+                    .style("margin-left", "20px")
+                    .style("padding-top", "40px");
+
+                listDiv.append("h4").text("Détails chiffrés :");
+                const ul = listDiv.append("ul");
+                fixedDesc.forEach(d => {
+                    ul.append("li").text(`${d.description} : ${d.count}`);
+                });
         }
         
         
