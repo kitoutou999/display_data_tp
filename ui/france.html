@@ -121,7 +121,7 @@
                             .style("top", "-500px");
                     })
                     .on("click", function(event, d) {                   
-                        d3.json(`http://127.0.0.1:4000/?query={prestationsByDpt(departement:"${e.department}"){description count}}`)
+                        d3.json(`http://127.0.0.1:4000/?query={prestationsByDpt(departement:"${e.department}"){description count sum avg}}`)
                             .then(data => drawPrestation(data, e.department));
                     });
             });
@@ -129,14 +129,81 @@
         function drawPrestation(data, department){
             const detailsDiv = d3.select("#details");
             detailsDiv.html(""); 
-            detailsDiv.append("h3").text(`Prestations pour le département ${department}`);
+            detailsDiv.append("h2").text(`Département ${department}`);
     
-            
-            const ul = detailsDiv.append("ul");
-            data.data.prestationsByDpt.forEach(p => {
-                ul.append("li").text(`${p.description.replaceAll("??","é")}: ${p.count}`);
-            });
-           
+                const prestations = data.data.prestationsByDpt;
+                
+                // Calcul des KPIs
+                const totalCount = d3.sum(prestations, d => d.count);
+                const totalRevenue = d3.sum(prestations, d => d.sum);
+                const avgPrice = totalRevenue / totalCount;
+
+                // Affichage des KPIs
+                const kpiDiv = detailsDiv.append("div").style("display", "flex").style("gap", "20px").style("margin-bottom", "20px");
+                kpiDiv.append("div").html(`<strong>Total Interventions:</strong> ${totalCount}`);
+                kpiDiv.append("div").html(`<strong>Chiffre d'affaires:</strong> ${totalRevenue.toLocaleString()} €`);
+                kpiDiv.append("div").html(`<strong>Prix Moyen:</strong> ${avgPrice.toFixed(2)} €`);
+
+                // Graphique en barres
+                const margin = { top: 50, right: 30, bottom: 100, left: 60 },
+                    width = 500 - margin.left - margin.right,
+                    height = 400 - margin.top - margin.bottom;
+
+                const svg = detailsDiv.append("svg")
+                    .attr("width", width + margin.left + margin.right)
+                    .attr("height", height + margin.top + margin.bottom)
+                    .append("g")
+                    .attr("transform", `translate(${margin.left},${margin.top})`);
+
+                // Titre du graphique
+                svg.append("text")
+                    .attr("x", (width / 2))             
+                    .attr("y", -20)
+                    .attr("text-anchor", "middle")  
+                    .style("font-size", "16px") 
+                    .style("font-weight", "bold")  
+                    .text("Répartition des prestations");
+
+                //Remplace les "??" par des "é" (pas trouver le probleme d'encodage)
+                const fixedDesc = prestations.map(d => {
+                    return {
+                        description: d.description.replaceAll("??", "é"),
+                        count: d.count
+                    };
+                });
+
+                fixedDesc.sort((a, b) => b.count - a.count);
+
+                // Axe X
+                const x = d3.scaleBand()
+                    .range([0, width])
+                    .domain(fixedDesc.map(d => d.description))
+                    .padding(0.2);
+
+                svg.append("g")
+                    .attr("transform", `translate(0, ${height})`)
+                    .call(d3.axisBottom(x))
+                    .selectAll("text")
+                    .attr("transform", "translate(-10,0)rotate(-45)")
+                    .style("text-anchor", "end");
+
+                // Axe Y
+                const y = d3.scaleLinear()
+                    .domain([0, d3.max(fixedDesc, d => d.count)])
+                    .range([height, 0]);
+                
+                svg.append("g")
+                    .call(d3.axisLeft(y));
+
+                // Barres
+                svg.selectAll("mybar")
+                    .data(fixedDesc)
+                    .join("rect")
+                    .attr("x", d => x(d.description))
+                    .attr("y", d => y(d.count))
+                    .attr("width", x.bandwidth())
+                    .attr("height", d => height - y(d.count))
+                    .attr("fill", "#69b3a2")  
         }
         
         
