@@ -96,6 +96,12 @@ async function aggregate(aggregation) {
     return result;
 }
 
+async function aggregateWithValue(aggregation, key, value) {
+ let newAggregation = [{$match: { [key] : value}}, ...aggregation]
+ const result = await collection.aggregate(newAggregation).toArray();
+ return result;
+}
+
 // un résolveur simple pour la requête 'books' de type Query
 // qui renvoie la variable 'books'
 const resolvers = {
@@ -108,7 +114,7 @@ const resolvers = {
             return aggregate(aggregateDepartments)
 	},
 	prestationsByDpt (root, args, context) {
-            return aggregate(aggregatePrestationsByDpt)
+            return aggregateWithValue(aggregatePrestation, 'adresse.department.id', args.departement);
 	}
     }
 }

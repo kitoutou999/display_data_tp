@@ -16,6 +16,7 @@
 
     <!-- Create a div where the graph will take place -->
     <div id="map"></div>
+    <div id="details"></div>
 
     <script>
 
@@ -118,13 +119,25 @@
                         div.html("")
                             .style("left", "-500px")
                             .style("top", "-500px");
+                    })
+                    .on("click", function(event, d) {                   
+                        d3.json(`http://127.0.0.1:4000/?query={prestationsByDpt(departement:"${e.department}"){description count}}`)
+                            .then(data => drawPrestation(data, e.department));
                     });
             });
         });
-        function drawPrestation(root){
-            console.log("DrawPréstation");
+        function drawPrestation(data, department){
+            const detailsDiv = d3.select("#details");
+            detailsDiv.html(""); 
+            detailsDiv.append("h3").text(`Prestations pour le département ${department}`);
+    
+            
+            const ul = detailsDiv.append("ul");
+            data.data.prestationsByDpt.forEach(p => {
+                ul.append("li").text(`${p.description.replaceAll("??","é")}: ${p.count}`);
+            });
+           
         }
-        d3.json("http://127.0.0.1:4000/?query={prestationsByDpt(departement:14){description count}}").then(drawPrestation);
         
         
 
