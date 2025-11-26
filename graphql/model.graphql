@@ -4,6 +4,8 @@ type Prestation{
      sum: Int
      count: Int
      avg: Float
+     min: Float
+     max: Float
 }
 
 type Department{

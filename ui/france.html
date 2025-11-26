@@ -121,7 +121,7 @@
                             .style("top", "-500px");
                     })
                     .on("click", function(event, d) {                   
-                        d3.json(`http://127.0.0.1:4000/?query={prestationsByDpt(departement:"${e.department}"){description count sum avg}}`)
+                        d3.json(`http://127.0.0.1:4000/?query={prestationsByDpt(departement:"${e.department}"){description count sum avg min max}}`)
                             .then(data => drawPrestation(data, e.department));
                     });
             });
@@ -150,7 +150,10 @@
                 const fixedDesc = prestations.map(d => {
                     return {
                         description: d.description.replaceAll("??", "é"),
-                        count: d.count
+                        count: d.count,
+                        min: d.min,
+                        max: d.max,
+                        avg: d.avg
                     };
                 });
                 fixedDesc.sort((a, b) => b.count - a.count);
@@ -213,12 +216,15 @@
                 
                 const listDiv = contentDiv.append("div")
                     .style("margin-left", "20px")
-                    .style("padding-top", "40px");
+                    .style("padding-top", "40px")
+                    .style("max-height", "400px")
+                    .style("overflow-y", "auto");
 
-                listDiv.append("h4").text("Détails chiffrés :");
+                listDiv.append("h4").text("Détails chiffrés (Prix Min - Max - Moyenne) :");
                 const ul = listDiv.append("ul");
                 fixedDesc.forEach(d => {
-                    ul.append("li").text(`${d.description} : ${d.count}`);
+                    ul.append("li").html(`<b>${d.description}</b> : ${d.count} interv.<br>
+                    <span style="font-size:0.9em; color:gray">Prix : ${d.min}€ - ${d.max}€ (Moy: ${d.avg ? d.avg.toFixed(2) : 'N/A'}€)</span>`);
                 });
         }
         

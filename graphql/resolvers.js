@@ -33,6 +33,12 @@ const aggregatePrestation = [
       avg: {
         $avg: '$price'
       },
+      min: {
+        $min: '$price'
+      },
+      max: {
+        $max: '$price'
+      },
       count: {
         $sum: 1
       }
@@ -44,6 +50,8 @@ const aggregatePrestation = [
       description: '$_id.prestation_description',
       sum: 1,
       avg: 1,
+      min: 1,
+      max: 1,
       count: 1,
       _id: 0
     }
