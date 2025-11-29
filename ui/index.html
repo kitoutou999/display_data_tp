@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Menu</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            background-color: #f4f4f4;
+        }
+        .card {
+            background-color: white;
+            padding: 30px;
+            max-width: 400px;
+            width: 100%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .card a {
+            text-decoration: none;
+            width: 80%;
+            margin-bottom: 10px; /
+        }
+        .card button {
+            background-color: #025a06;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            width: 100%; 
+        }
+        .card button:hover {
+            background-color: #014105;
+        }
+        a.france-button button {
+            background-color: #28a745; 
+        }
+        a.france-button button:hover {
+            background-color: #218838; 
+        }
+    </style>
+</head>
+<body>
+    <div class="card">
+        <h1>Bienvenue</h1>
+        <p>Menu de navigation.</p>
+        <a href="france.html" class="france-button"><button>Aller en France</button></a>
+        <a href="bar.html"><button>Aller au Bar</button></a>
+        <a href="prestation_bar.html"><button>Aller à la Prestation Bar</button></a>
+        <a href="prestation.html"><button>Aller à la Prestation</button></a>
+    </div>
+</body>
+</html>
